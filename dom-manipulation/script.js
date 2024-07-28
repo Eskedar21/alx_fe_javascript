@@ -1,4 +1,3 @@
-
 const apiUrl = 'https://jsonplaceholder.typicode.com/posts'; // Using posts as a placeholder
 
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [];
@@ -17,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
   // Periodically sync data with server
-  setInterval(syncWithServer, 60000); // Sync every minute
+  setInterval(syncQuotes, 60000); // Sync every minute
 });
 
 function loadQuotes() {
@@ -44,7 +43,7 @@ function addQuote() {
     populateCategories();
     filterQuotes();
     alert('Quote added successfully!');
-    syncWithServer(); // Sync immediately after adding a new quote
+    postQuoteToServer({ text: quoteText, category: quoteCategory }); // Post new quote to the server
   } else {
     alert('Both text and category are required to add a quote.');
   }
@@ -129,7 +128,7 @@ function exportToJsonFile() {
   document.body.removeChild(a);
 }
 
-async function syncWithServer() {
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(apiUrl);
     const serverQuotes = await response.json();
@@ -140,13 +139,34 @@ async function syncWithServer() {
       category: 'Server'
     }));
 
-    // Conflict resolution: Server data takes precedence
-    quotes = formattedQuotes;
-    saveQuotes();
-    populateCategories();
-    filterQuotes();
-    alert('Quotes synced with server successfully!');
+    return formattedQuotes;
   } catch (error) {
-    console.error('Error syncing with server:', error);
+    console.error('Error fetching quotes from server:', error);
+    return [];
   }
+}
+
+async function postQuoteToServer(quote) {
+  try {
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quote)
+    });
+  } catch (error) {
+    console.error('Error posting quote to server:', error);
+  }
+}
+
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+
+  // Conflict resolution: Server data takes precedence
+  quotes = serverQuotes;
+  saveQuotes();
+  populateCategories();
+  filterQuotes();
+  alert('Quotes synced with server successfully!');
 }
