@@ -78,11 +78,38 @@ function showLastViewedQuote() {
   }
 }
 
+// Function to export quotes to a JSON file
+function exportToJsonFile() {
+  const dataStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'quotes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert('Quotes imported successfully!');
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
 // Event listener for DOM content loaded
 document.addEventListener('DOMContentLoaded', function () {
   loadQuotes(); // Load quotes from local storage
   showLastViewedQuote(); // Show the last viewed quote if available
 
   document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+  document.getElementById('exportJson').addEventListener('click', exportToJsonFile);
+  document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+  
   createAddQuoteForm(); // Create the form for adding new quotes
 });
