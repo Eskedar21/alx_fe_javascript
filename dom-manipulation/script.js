@@ -168,5 +168,23 @@ async function syncQuotes() {
   saveQuotes();
   populateCategories();
   filterQuotes();
-  alert('Quotes synced with server successfully!');
+  showNotification('Quotes synced with server!');
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.textContent = message;
+  notification.style.position = 'fixed';
+  notification.style.bottom = '10px';
+  notification.style.right = '10px';
+  notification.style.padding = '10px';
+  notification.style.backgroundColor = 'green';
+  notification.style.color = 'white';
+  notification.style.borderRadius = '5px';
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
 }
